@@ -1,0 +1,22 @@
+void setup () {
+  size (800, 800);
+  smooth();
+  background (0);
+}
+
+void draw () {
+
+  translate (width/2, height /2);
+  fill (0,0,0,3);
+  rectMode(CENTER);
+  rect ( 0,0, width, height);
+
+  pushMatrix ();
+  rotate (radians (frameCount)*7);
+  stroke (0, 150, 255);
+
+  line ( mouseY/2,mouseX/2, mouseY/2,0);
+  line ( mouseY/2,-mouseX/2, mouseY/2,0);
+  popMatrix ();
+  
+}
