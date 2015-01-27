@@ -31,9 +31,9 @@ void draw () {
   R = map(mouseX, 0, 700, 0, 255);
   B = map(mouseY, 0, 400, 0, 255);
   G = map(mouseY, 0, 400, 0, 255);
-  //G = random ( 0, 255); 
+
   if (mousePressed) { 
-    // in vase range zarde poshte
+  
 
     if ( abs( R3- R2) > 10) {
       R3 = R3 + dR;
@@ -52,7 +52,7 @@ void draw () {
     rectMode (CORNER);
     rect (0, 0, width, height);
 
-    // in vase range ranginkamunie mostatilast
+
     fill ( mouseX, G, mouseY);
     strokeWeight (0.5);
     rectMode (CENTER);
