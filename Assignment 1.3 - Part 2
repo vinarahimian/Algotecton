@@ -1,0 +1,24 @@
+int len = 50;
+
+void setup() {
+  size (600, 600);
+}
+
+void draw() {
+  background (100);
+  for (int i=0; i<width; i+=len) {
+    for (int j=0; j<height ; j+=len) {
+      float rx = random (1, len);
+      float ry= random (1, len);
+      draw_triangle (i, j, len, rx, ry );
+    }
+  }
+  noLoop();
+}
+
+void draw_triangle(float locX, float locY, float len, float rx, float ry) {
+  translate ( locX, locY);
+  triangle (0, 0, len, 0, rx, ry);
+  triangle (0, len, rx, ry, len, len);
+  translate (-locX, -locY);
+}
