@@ -1,0 +1,60 @@
+
+import peasy.*;
+int len = 50;
+PeasyCam cam;
+
+
+void setup() {
+  size (600, 600, P3D);
+  cam = new PeasyCam(this, 300);
+  cam.setMinimumDistance(600);
+  cam.setMaximumDistance(5000);
+}
+
+void draw() {
+  rotateX(-.5);
+  rotateY(-.5);
+  background (100);
+  for (int i=0; i<width; i+=len) {
+    for (int j=0; j<height; j+=len) {
+      float rx = random (1, len);
+      float ry= random (1, len);
+      float rz= random (-0.66*len, .66*len);
+      draw_triangle (i, j, len, rx, ry, rz );
+    }
+  }
+}
+
+void draw_triangle(float locX, float locY, float len, float rx, float ry, float rz) {
+
+  //  if (rz>=0) {
+  //    float B = map ( rz, 0, 0.66*len, 0, 255);
+  //    fill ( 0, 0, B, 255-B);
+  //  } else {
+  //
+  //    float R = map ( rz, -0.66*len,0,  0, 255);
+  //    fill ( R, 0, 0); 
+  //     println (rz);
+  //  }
+
+  float B = map ( rz, -0.66*len, 0.66*len, 0, 255);
+
+  fill(B, 0, 255-B);
+
+  translate ( locX, locY, 0);
+  // triangle (0, 0, 0, len, 0,0, rx, ry,rz );
+  beginShape(TRIANGLES);
+  vertex(0, 0, 0);
+  vertex(len, 0, 0);
+  vertex(rx, ry, rz);
+  endShape(); 
+
+  //triangle (0, len, 0, rx, ry, rz, len, len, 0);
+  beginShape(TRIANGLES);
+  vertex(0, len, 0);
+  vertex(rx, ry, rz);
+  vertex(len, len, 0);
+  endShape(); 
+
+  translate (-locX, -locY, 0);
+}
