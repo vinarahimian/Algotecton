@@ -1,0 +1,64 @@
+//Library
+import kinect4WinSDK.Kinect;
+import kinect4WinSDK.SkeletonData;
+
+Kinect kinect;
+ArrayList <SkeletonData> bodies;
+
+//DECLARING
+int count=500;
+float vector=0;
+float n=1;
+points[] allPoints=new points[count];
+
+
+void setup() {
+  size(1200, 800, P3D); 
+  background(0);
+  kinect = new Kinect(this);
+  bodies = new ArrayList<SkeletonData>();
+  translate(width, 0, 0);
+  rotateX(PI);
+  smooth();
+
+  //INITIALIZE
+  for (int i=0; i<count; i++) {
+    allPoints [i] = new points(int (random(-width, width)), int (random(-height, height)), int (random (-width, width)));
+  }
+}
+
+void draw() {
+  background(0);
+  // CALLING TO DRAW THE HANDS 
+  if (bodies.size ()>0) {
+    float vector = drawHand(bodies.get(0));
+    println ("Vector Value = ", vector);
+  }
+
+  // ROTATION OF THE 3D SPACE //still with mouse, should change it to gesture
+  translate(width/2, height/2, vector);
+  rotateX(map(mouseY, 0, height, -PI, PI));//MAPPING THE MOUSE THRESHOLD TO THE 3D THRESHOLD
+  rotateY(map(mouseX, 0, width, PI, -PI)); 
+  translate(width/2, height/2, vector);
+  background(50);
+
+  //DRAWING LINES BETWEEN THE POINTS UNDER SOME CONDITIONS
+  for (int u=0; u<count; u++)
+  {
+    allPoints[u].display();
+    for (int v=0; v<count; v++)
+    {
+      if (abs(allPoints[u].z-allPoints[v].z)<200) 
+        if (abs(allPoints[u].x-allPoints[v].x)<200)
+          if (abs(allPoints[u].y-allPoints[v].y)<200)
+          {
+            stroke(0, 150, 255);
+            strokeWeight(.5);
+            beginShape(LINES);
+            vertex(allPoints[u].x, allPoints[u].y, allPoints[u].z);
+            vertex(allPoints[v].x, allPoints[v].y, allPoints[v].z);
+            endShape();
+          }
+    }
+  }
+}
