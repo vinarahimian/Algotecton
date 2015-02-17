@@ -1,0 +1,175 @@
+//LIBRARY
+import kinect4WinSDK.Kinect;
+import kinect4WinSDK.SkeletonData;
+
+Kinect kinect;
+ArrayList <SkeletonData> bodies;
+
+//DECLARING
+int count=500;
+float vector=0;
+float n=1;
+points[] allPoints=new points[count];
+
+
+void setup() {
+  size(1200, 800, P3D); 
+  background(0);
+  kinect = new Kinect(this);
+  bodies = new ArrayList<SkeletonData>();
+  translate(width, 0, 0);
+  rotateX(PI);
+  smooth();
+
+  //INITIALIZE
+  for (int i=0; i<count; i++) {
+    allPoints [i] = new points(int (random(-width, width)), int (random(-height, height)), int (random (-width, width)));
+  }
+}
+
+void draw() {
+  background(0);
+  // CALLING TO DRAW THE HANDS 
+  if (bodies.size ()>0) {
+    float vector = drawHand(bodies.get(0));
+    println ("Vector Value = ", vector);
+  }
+
+  // ROTATION OF THE 3D SPACE //still with mouse, should change it to gesture
+  translate(width/2, height/2, vector);
+  rotateX(map(mouseY, 0, height, -PI, PI));//MAPPING THE MOUSE THRESHOLD TO THE 3D THRESHOLD
+  rotateY(map(mouseX, 0, width, PI, -PI)); 
+  translate(width/2, height/2, vector);
+  background(50);
+
+  //DRAWING LINES BETWEEN THE POINTS UNDER SOME CONDITIONS
+  for (int u=0; u<count; u++)
+  {
+    allPoints[u].display();
+    for (int v=0; v<count; v++)
+    {
+      if (abs(allPoints[u].z-allPoints[v].z)<200) 
+        if (abs(allPoints[u].x-allPoints[v].x)<200)
+          if (abs(allPoints[u].y-allPoints[v].y)<200)
+          {
+            stroke(0, 150, 255);
+            strokeWeight(.5);
+            beginShape(LINES);
+            vertex(allPoints[u].x, allPoints[u].y, allPoints[u].z);
+            vertex(allPoints[v].x, allPoints[v].y, allPoints[v].z);
+            endShape();
+          }
+    }
+  }
+}
+
+//CLASS
+class points {
+  //DATA
+  float x;
+  float y;
+  float z;
+  float sz;
+ 
+ //CONSTRUCTOR
+  points(float _x, float _y, float _z) {
+    x=_x;
+    y=_y;
+    z=_z;
+  }
+
+//FUNCTIONALITY
+  void display() {
+
+    float sz=random(10, 50);
+    pushMatrix();
+    translate(x, y, z);
+    stroke(0, 150, 255);
+    strokeWeight(1);
+    fill(0, 150, 255, 20);
+    box(sz);
+    popMatrix();
+    sz+=n;
+    if (sz>50||sz<1) {
+      n*=-1;
+    }
+  }
+}
+
+float drawHand(Ske-letonData _s) {
+  noFill();
+  stroke(255, 255, 0);
+  pushMatrix();
+  translate (0, 0, 0);
+  rotateX(0);
+  rotateY(0);
+
+  //POSITIONING THE X AND Y VALUE OF EACH HAND (WRIST)
+  float r_xpos = _s.skeletonPositions[10].x*width; //RIGHT HAND WRIST X-POSITION
+  float r_ypos = _s.skeletonPositions[10].y*height; //RIGHT HAND WRIST Y-POSITION
+  float l_xpos = _s.skeletonPositions[6].x*width; //LEFT HAND WRIST X-POSITION
+  float l_ypos = _s.skeletonPositions[6].y*height; //LEFT HAND WRIST Y-POSITION
+
+  //RECOGNIZING THE HANDS
+  ellipse( r_xpos, r_ypos, 10, 10);
+  text("Wrist Right", r_xpos, r_ypos);
+  ellipse( l_xpos, l_ypos, 10, 10);
+  text("Wrist Right", l_xpos, l_ypos);
+  line (r_xpos, r_ypos, l_xpos, l_ypos); //DRAWING A LINE BETWEEN HANDS. IS'S IN THE 0,0 THAT'S WHY WE'RE NOT SEEING IT
+
+  //FOR ZOOMING IN AND OUT
+  //DISTANCE BETWEEN TWO HANDS
+  float r = dist(r_xpos, r_ypos, l_xpos, l_ypos); 
+  //text (r, (r_xpos+ l_xpos)/2, (r_ypos+ l_ypos)/2 );
+  
+  //MAPPING THE DISTANCE BETWEEN THE HANDS WITH THE AMOUNT WE WANT IT TO ZOOM IN AND OUT
+  vector = map(r, 0, 250, -500, 500);
+
+  popMatrix();
+  return vector;
+}
+
+
+//FOR TRACKING HANDS 
+void appearEvent(SkeletonData _s) 
+{
+  if (_s.trackingState == Kinect.NUI_SKELETON_NOT_TRACKED) 
+  {
+    return;
+  }
+  synchronized(bodies) {
+    bodies.add(_s);
+  }
+}
+
+void disappearEvent(SkeletonData _s) 
+{
+  synchronized(bodies) {
+    for (int i=bodies.size ()-1; i>=0; i--) 
+    {
+      if (_s.dwTrackingID == bodies.get(i).dwTrackingID) 
+      {
+        bodies.remove(i);
+      }
+    }
+  }
+}
+
+void moveEvent(SkeletonData _b, SkeletonData _a) 
+{
+  if (_a.trackingState == Kinect.NUI_SKELETON_NOT_TRACKED) 
+  {
+    return;
+  }
+  synchronized(bodies) {
+    for (int i=bodies.size ()-1; i>=0; i--) 
+    {
+      if (_b.dwTrackingID == bodies.get(i).dwTrackingID) 
+      {
+        bodies.get(i).copy(_a);
+        break;
+      }
+    }
+  }
+}
+
