@@ -1,0 +1,237 @@
+// I HAVE A TAB FOR TABLE CLASS, A TAB FOR VARIABLES, AND A TAB FOR MY MAIN CODE
+
+//THESE ARE MY VARIABLES WRITTEN IN A SEPERATE TAB
+color[] rainbow = {
+  #FFFFCD, #CC5C54, #F69162, #85A562, #7AB5DB, #a56285
+};
+color[] palette = rainbow;
+
+Table MyResData;
+int rowCount;
+PFont labelFont;
+boolean halat = false;
+int row_=0;
+int multi=1000;
+
+// THIS IS THE TAB FOR THE MAIN CODE
+void setup() {
+  size(1200, 700);
+  smooth();
+  MyResData=new Table("MyResData.tsv");
+  rowCount=MyResData.getRowCount();
+  labelFont= loadFont ("ArialMT-48.vlw");
+}
+
+void draw() {
+  background(0);
+  textFont(labelFont, 18);
+  stroke(255);
+  fill(255);
+
+
+  if (!halat) {
+    for (int row=0; row<rowCount; row++) {
+      float members = MyResData.getFloat(row, 1);
+      float consumption=MyResData.getFloat (row, 3);
+      float expect=MyResData.getFloat (row, 5);
+      stroke(255);
+      text("Energy Consumption Comparison ", width-1145, height/2-25);
+      text("Between Houses", width-1145, height/2);
+      text("With Different Family Members", width-1145, height/2+25);
+      //for real consumption
+      stroke(palette[row], 500);
+      strokeWeight(3.5);
+      fill(palette[row], 50);
+
+      ellipse(width/2+sqrt(consumption*multi)/2+250, height/2, sqrt(consumption*multi), sqrt(consumption*multi));
+      //for expected consumption
+      ellipse(width/2-sqrt(expect*multi)/2+250, height/2, sqrt(expect*multi), sqrt(expect*multi));
+    }
+  } 
+
+  if (halat) {
+
+    float members = MyResData.getFloat(row_, 1);
+    float consumption=MyResData.getFloat (row_, 3);
+    float expect=MyResData.getFloat (row_, 5);
+
+    //for real consumption
+    stroke(palette[row_], 500);
+    strokeWeight(3.5);
+    fill(palette[row_], 50);
+    ellipse(width/2+sqrt(consumption*multi)/2+250, height/2, sqrt(consumption*multi), sqrt(consumption*multi));
+    //for expected consumption
+    ellipse(width/2-sqrt(expect*multi)/2+250, height/2, sqrt(expect*multi), sqrt(expect*multi));
+  }
+
+// for getting comparisons one by one based on number of members
+  if (keyPressed) {
+    halat=true;
+    if (key =='0') {
+      fill(palette[row_]);
+      row_=0;
+      text("ONE house with ONE family member", width-1145, height/2);
+    }
+    if (key =='1') {
+      fill(palette[row_]);
+      row_=1;
+      text("TWO houses with ONE family member", width-1145, height/2-25);
+      text("vs", width-1145, height/2);
+      text("ONE house with TWO family members", width-1145, height/2+25);
+    }
+    if (key =='2') {
+      fill(palette[row_]);
+      row_=2;
+      text("THREE houses with ONE family member", width-1145, height/2-25);
+      text("vs", width-1145, height/2);
+      text("ONE house with THREE family members", width-1145, height/2+25);
+    }
+    if (key =='3') {
+      fill(palette[row_]);
+      row_=3;
+      text("FOUR houses with ONE family member", width-1145, height/2-25);
+      text("vs", width-1145, height/2);
+      text("ONE house with FOUR family members", width-1145, height/2+25);
+    }
+    if (key =='4') {
+      fill(palette[row_]);
+      row_=4;
+      text("FIVE houses with ONE family member", width-1145, height/2-25);
+      text("vs", width-1145, height/2);
+      text("ONE house with FIVE family members", width-1145, height/2+25);
+    }
+    if (key =='5') {
+      fill(palette[row_]);
+      row_=5;
+      text("SIX houses with ONE family member", width-1145, height/2-25);
+      text("vs", width-1145, height/2);
+      text("ONE house with SIX family members", width-1145, height/2+25);
+    }
+  }
+
+  if (mousePressed) {
+    halat =false;
+  }
+}
+
+
+// THIS IS MY TABLE CLASS WRITTEN IN A SEPERATE TAB _ YOU COULD BASICALLY COPY AND PASTE IT IN YOURS
+class Table { //class Pishi
+  int rowCount;
+  String[][] data;
+  
+  
+  Table(String filename) { //Pishi (int dom, int goosh,...)
+    String[] rows = loadStrings(filename);
+    data = new String[rows.length][];
+    
+    for (int i = 0; i < rows.length; i++) {
+      if (trim(rows[i]).length() == 0) {
+        continue; // skip empty rows
+      }
+      if (rows[i].startsWith("#")) {
+        continue;  // skip comment lines
+      }
+      
+      // split the row on the tabs
+      String[] pieces = split(rows[i], TAB);
+      // copy to the table array
+      data[rowCount] = pieces;
+      rowCount++;
+      
+      // this could be done in one fell swoop via:
+      //data[rowCount++] = split(rows[i], TAB);
+    }
+    // resize the 'data' array as necessary
+    data = (String[][]) subset(data, 0, rowCount);
+  }
+  
+  
+  int getRowCount() {
+    return rowCount;
+  }
+  
+  
+  // find a row by its name, returns -1 if no row found
+  int getRowIndex(String name) {
+    for (int i = 0; i < rowCount; i++) {
+      if (data[i][0].equals(name)) {
+        return i;
+      }
+    }
+    println("No row named '" + name + "' was found");
+    return -1;
+  }
+  
+  
+  String getRowName(int row) {
+    return getString(row, 0);
+  }
+
+
+  String getString(int rowIndex, int column) {
+    return data[rowIndex][column];
+  }
+
+  
+  String getString(String rowName, int column) {
+    return getString(getRowIndex(rowName), column);
+  }
+
+  
+  int getInt(String rowName, int column) {
+    return parseInt(getString(rowName, column));
+  }
+
+  
+  int getInt(int rowIndex, int column) {
+    return parseInt(getString(rowIndex, column));
+  }
+
+  
+  float getFloat(String rowName, int column) {
+    return parseFloat(getString(rowName, column));
+  }
+
+  
+  float getFloat(int rowIndex, int column) {
+    return parseFloat(getString(rowIndex, column));
+  }
+  
+  
+  void setRowName(int row, String what) {
+    data[row][0] = what;
+  }
+
+
+  void setString(int rowIndex, int column, String what) {
+    data[rowIndex][column] = what;
+  }
+
+  
+  void setString(String rowName, int column, String what) {
+    int rowIndex = getRowIndex(rowName);
+    data[rowIndex][column] = what;
+  }
+
+  
+  void setInt(int rowIndex, int column, int what) {
+    data[rowIndex][column] = str(what);
+  }
+
+  
+  void setInt(String rowName, int column, int what) {
+    int rowIndex = getRowIndex(rowName);
+    data[rowIndex][column] = str(what);
+  }
+
+  void setFloat(int rowIndex, int column, float what) {
+    data[rowIndex][column] = str(what);
+  }
+
+  void setFloat(String rowName, int column, float what) {
+    int rowIndex = getRowIndex(rowName);
+    data[rowIndex][column] = str(what);
+  }  
+}
+
